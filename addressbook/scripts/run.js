@@ -1,8 +1,23 @@
 const main = async () => {
-    const Chat = hre.ethers.getContractFactory("Chat");
-    const chat = await Chat.deploy();
+    const [deployer, rand] = await hre.ethers.getSigners();
 
-    console.log("Chat deployed to:", chat.address());
+    const AddressBookFactory = await hre.ethers.getContractFactory("AddressBook");
+    const addressBook = await AddressBookFactory.deploy();
+    await addressBook.deployed();
+
+    console.log("Contract deployed to:", addressBook.address);
+    console.log("Contract deployed by", deployer.address);
+
+
+    console.log(deployer.address, rand.address);
+
+    await addressBook.addAddress(deployer.address, rand.address, "my buddy");
+
+    const ary = await addressBook.getAddressArray(deployer.address);
+
+    console.log(ary);
+
+
 }
 
 main()
