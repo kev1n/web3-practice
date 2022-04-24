@@ -1,5 +1,5 @@
 const main = async () => {
-    const [deployer, rand] = await hre.ethers.getSigners();
+    const [deployer, rand, rand2] = await hre.ethers.getSigners();
 
     const AddressBookFactory = await hre.ethers.getContractFactory("AddressBook");
     const addressBook = await AddressBookFactory.deploy();
@@ -8,14 +8,19 @@ const main = async () => {
     console.log("Contract deployed to:", addressBook.address);
     console.log("Contract deployed by", deployer.address);
 
+    
+    await addressBook.addAddress(rand2.address, "second buddy");
+    console.log(await addressBook.getAlias(rand2.address))
 
-    console.log(deployer.address, rand.address);
-
-    await addressBook.addAddress(deployer.address, rand.address, "my buddy");
-
-    const ary = await addressBook.getAddressArray(deployer.address);
-
+    await addressBook.addAddress(rand.address, "my buddy");
+    let ary = await addressBook.getAddressArray(deployer.address);
     console.log(ary);
+
+
+    await addressBook.removeAddress(rand.address);
+    ary = await addressBook.getAddressArray(deployer.address);
+    console.log(ary);
+    console.log(rand.address, " removed");
 
 
 }

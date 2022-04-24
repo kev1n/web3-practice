@@ -25,18 +25,27 @@ contract AddressBook {
     //adds address to your list of addresses in the _addresses map.
     //Uses push since it is an array
     //adds your address, address and alias to the _aliases map
-    function addAddress(address yourAddress, address theirAddress, string memory alia) public {
-        require(msg.sender == yourAddress);
-        _addresses[yourAddress].push(theirAddress);
-        _aliases[yourAddress][theirAddress] = alia;
+    function addAddress(address theirAddress, string memory alia) public {
+        _addresses[msg.sender].push(theirAddress);
+        _aliases[msg.sender][theirAddress] = alia;
     }
 
-    function removeAddress() public {
-        
+    function removeAddress(address theirAddress) public {
+        delete(_addresses[msg.sender][indexOf(_addresses[msg.sender], theirAddress)]);
+        delete(_aliases[msg.sender][theirAddress]);
     }
 
-    //Gets the alias for your address
-    function getAlias() public{
-    
+    //Gets the alias for a address
+    function getAlias(address theirAddress) public view returns (string memory) {
+        return _aliases[msg.sender][theirAddress];
+    }
+
+    function indexOf(address[] memory ary, address search) public pure returns (uint) {
+        for (uint i = 0; i < ary.length; i++) {
+            if (ary[i] == search) {
+                return i;
+            }
+        }
+        revert("Address not found");
     }
 }
