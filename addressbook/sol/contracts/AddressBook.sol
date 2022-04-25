@@ -35,7 +35,7 @@ contract AddressBook {
         delete(_aliases[msg.sender][theirAddress]);
     }
 
-    //Gets the alias for a address
+    //Gets the alias for an address
     function getAlias(address theirAddress) public view returns (string memory) {
         return _aliases[msg.sender][theirAddress];
     }
