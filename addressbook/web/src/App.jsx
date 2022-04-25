@@ -33,26 +33,22 @@ function App() {
   }
 
   //Contract interactions
-  const [addresses, setAddresses] = useState();
   const getAddressArray = async () => {
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, abi, signer);
     
     const response = await contract.getAddressArray(address);
-    setAddresses(response);
+    return response
   }
 
-  const [addressToAlias, setAddressToAlias] = useState();
-  const getAlias = async () => {
+  const getAlias = async (props) => {
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, abi, signer);
     
-    for (int i = 0; i < address.length; i++) {
-      const response = await contract.getAlias(address[i]);
-      setAddressToAlias({address: response});
-    }
+    const response = await contract.getAlias(props.address);
+    return response
   }
 
   const addAddress = async (props) => {
@@ -122,9 +118,9 @@ function App() {
       </>
     )
   }
-/*
-  const Address = async (address) => {
-    const alias = await getAlias(address);
+
+  const Address = (address, alias) => {
+    
     return (
       <>
         <div>
@@ -133,7 +129,31 @@ function App() {
       </>
     )
   }
-*/
+  const AddressBook = () => {
+    const [addressList, setAddressList] = useState([]);
+
+    const findValidAddresses = () => {
+        getAddressArray().then((resp) => {
+          setAddressList(resp);
+          console.log(addressList)
+        })
+        
+    }
+
+    useEffect(() => {
+      findValidAddresses()
+    }, [])
+
+    
+    return (
+      <>
+        {addressList && addressList.map((addy) =>
+          <Address key={addy} address={addy} alias={addy}/>
+        )}
+      </>
+    )
+  }
+  
 
   return (
     <>
@@ -149,7 +169,7 @@ function App() {
         <br/>
         <RemovingForm/>
         <br/>
-
+        <AddressBook/>
       </>
       }
     </>
