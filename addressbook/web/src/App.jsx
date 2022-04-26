@@ -12,10 +12,15 @@ function App() {
   useEffect(() => {
     if (hasWeb3) {
       findAccount();
+      
     } else {
       alert("Install metamask!!")
     }
   })
+
+  useEffect(() => {
+    getAliasList();
+  }, [])
 
   const hasWeb3 = () => {
     return Boolean(ethereum);
@@ -119,41 +124,25 @@ function App() {
     )
   }
 
-  const Address = (address, alias) => {
-    
-    return (
-      <>
-        <div>
-            {address} AKA {alias}
-        </div>
-      </>
-    )
+  const [addressList, setAddressList] = useState([]);
+  const [aliasList, setAliasList] = useState([]);
+  const cleanAddresses = async () => {
+    let aliasRequests = [];
+    getAddressArray().then((resp) => {
+      setAddressList(resp);
+      for (let i = 0; i < resp; i++) {
+        aliasRequests.push(getAlias(resp[i]));
+      }
+    })
+    return Promise.all(aliasRequests);
   }
-  const AddressBook = () => {
-    const [addressList, setAddressList] = useState([]);
 
-    const findValidAddresses = () => {
-        getAddressArray().then((resp) => {
-          setAddressList(resp);
-          console.log(addressList)
-        })
-        
-    }
-
-    useEffect(() => {
-      findValidAddresses()
-    }, [])
-
-    
-    return (
-      <>
-        {addressList && addressList.map((addy) =>
-          <Address key={addy} address={addy} alias={addy}/>
-        )}
-      </>
-    )
+  const getAliasList = async () => {
+    cleanAddresses().then((resp) => {
+      console.log(resp);
+      setAliasList(resp);
+    })
   }
-  
 
   return (
     <>
@@ -169,7 +158,8 @@ function App() {
         <br/>
         <RemovingForm/>
         <br/>
-        <AddressBook/>
+        <button onClick={() => getAliasList()}></button>
+        <button onClick={() => console.log(aliasList)}></button>
       </>
       }
     </>
