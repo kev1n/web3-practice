@@ -2,9 +2,10 @@ import './App.css';
 import contractABI from './utils/abi.json';
 import React, {useState, useEffect} from 'react';
 import {ethers} from 'ethers';
+import { arrayify } from 'ethers/lib/utils';
 function App() {
   //WEB3 methods
-  const contractAddress = "0x4A4d9dD95DDb359EaBbc4fb64Ba10cf29BDC895e";
+  const contractAddress = "0x9707a91949d7f42588d9FbCaC3F3D8A7cBa6b0FF";
   const abi = contractABI.abi;
   const ethereum = window.ethereum;
   const [address, setAddress] = useState("");
@@ -20,10 +21,24 @@ function App() {
   })
 
   useEffect(() => {
-    if (address) {
+    if (address && hasWeb3) {
       cleanAddresses();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const addressContract = new ethers.Contract(contractAddress, abi, signer);
+      addressContract.on("AddressAdded", onAddressAdded);
+      addressContract.on("AddressRemoved", onAddressRemoved); 
     }
   }, [address])
+
+  //Events
+  const onAddressAdded = (theAddress, theAlias) => {
+    cleanAddresses();
+  }
+
+  const onAddressRemoved = (theAddress) => {
+    cleanAddresses();
+  }
 
   const hasWeb3 = () => {
     return Boolean(ethereum);
@@ -172,7 +187,7 @@ function App() {
             {
               addressList.map((element) => 
                 <>
-                <tr>
+                <tr key={element}>
                   <td>{element}</td>
                   <td>{aliasList[addressList.indexOf(element)]}</td>
                 </tr>

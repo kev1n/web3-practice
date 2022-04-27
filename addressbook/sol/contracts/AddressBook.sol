@@ -9,13 +9,13 @@ contract AddressBook {
     //As an example your address to a list of addresses you are interested in.  This supports multiple people having an address book
 
     mapping(address => address[]) private _addresses;
-
- 
+    event AddressAdded(address addy, string alia);
+    event AddressRemoved(address addy);
     //maps an address to another map of address to a string
     //example - your address mapped to a mapping of your address book to its alias
 
     mapping(address => mapping(address => string)) private _aliases;
-
+    
 
     //returns the list of addresses in the _addresses map
     function getAddressArray(address yourAddress) public view returns (address[] memory) {
@@ -28,11 +28,13 @@ contract AddressBook {
     function addAddress(address theirAddress, string memory alia) public {
         _addresses[msg.sender].push(theirAddress);
         _aliases[msg.sender][theirAddress] = alia;
+        emit AddressAdded(theirAddress, alia);
     }
 
     function removeAddress(address theirAddress) public {
         delete(_addresses[msg.sender][indexOf(_addresses[msg.sender], theirAddress)]);
         delete(_aliases[msg.sender][theirAddress]);
+        emit AddressRemoved(theirAddress);
     }
 
     //Gets the alias for an address
