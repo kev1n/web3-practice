@@ -8,19 +8,22 @@ function App() {
   const abi = contractABI.abi;
   const ethereum = window.ethereum;
   const [address, setAddress] = useState("");
+  const [addressList, setAddressList] = useState([]);
+  const [aliasList, setAliasList] = useState([]);
 
   useEffect(() => {
     if (hasWeb3) {
       findAccount();
-      
     } else {
       alert("Install metamask!!")
     }
   })
 
   useEffect(() => {
-    getAliasList();
-  }, [])
+    if (address) {
+      cleanAddresses();
+    }
+  }, [address])
 
   const hasWeb3 = () => {
     return Boolean(ethereum);
@@ -44,6 +47,7 @@ function App() {
     const contract = new ethers.Contract(contractAddress, abi, signer);
     
     const response = await contract.getAddressArray(address);
+
     return response
   }
 
@@ -52,7 +56,7 @@ function App() {
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, abi, signer);
     
-    const response = await contract.getAlias(props.address);
+    const response = await contract.getAlias(props.toAddress);
     return response
   }
 
@@ -124,24 +128,22 @@ function App() {
     )
   }
 
-  const [addressList, setAddressList] = useState([]);
-  const [aliasList, setAliasList] = useState([]);
   const cleanAddresses = async () => {
-    let aliasRequests = [];
-    getAddressArray().then((resp) => {
-      setAddressList(resp);
-      for (let i = 0; i < resp; i++) {
-        aliasRequests.push(getAlias(resp[i]));
-      }
-    })
-    return Promise.all(aliasRequests);
-  }
-
-  const getAliasList = async () => {
-    cleanAddresses().then((resp) => {
-      console.log(resp);
-      setAliasList(resp);
-    })
+    try {
+      let aliasRequests = [];
+      const addyArray = await getAddressArray();
+      setAddressList(addyArray);
+      addyArray.forEach(element => {
+        const aliasForAddress = getAlias({
+          toAddress: element
+        });
+        aliasRequests.push(aliasForAddress);
+      })
+      const aliasClean = await Promise.all(aliasRequests);
+      setAliasList(aliasClean);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -158,8 +160,31 @@ function App() {
         <br/>
         <RemovingForm/>
         <br/>
-        <button onClick={() => getAliasList()}></button>
-        <button onClick={() => console.log(aliasList)}></button>
+        <table>
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>Alias</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {
+              addressList.map((element) => 
+                <>
+                <tr>
+                  <td>{element}</td>
+                  <td>{aliasList[addressList.indexOf(element)]}</td>
+                </tr>
+                
+                </>
+              )
+            }
+
+            
+            
+          </tbody>
+        </table>
       </>
       }
     </>
